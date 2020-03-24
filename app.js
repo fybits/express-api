@@ -6,7 +6,7 @@ const logger = require('morgan');
 
 const testRouter = require('./routes/test');
 const authRouter = require('./routes/auth');
-const indexRouter = require('./routes/index');
+const postsRouter = require('./routes/posts');
 const usersRouter = require('./routes/users');
 
 const app = express();
@@ -21,9 +21,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/test', testRouter);
+app.use('/posts', postsRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
@@ -39,7 +39,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.send('');
 });
 
 module.exports = app;

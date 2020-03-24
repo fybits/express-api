@@ -4,6 +4,7 @@ const Form = require('formidable').IncomingForm;
 const crypto = require('crypto');
 const db = require('../database/models');
 const User = db.user;
+const { makeJWT, validateJWT } = require('../jwt');
 
 router.post('/sign_in', async function(req, res) {
   res.setHeader('access-control-allow-origin', '*')
@@ -28,25 +29,9 @@ router.post('/sign_in', async function(req, res) {
       delete body.errors;
       const { password, ...data } = user.toJSON();
       body.data = data;
-      let JWT = {
-        header: {
-          alg: "HS256",
-          typ: "JWT"
-        },
-        payload: {
-          ...data,
-          iat: (Date.now() / 1000 + 604800) 
-        }
-      }
-      let header = new Buffer(JSON.stringify(JWT.header)).toString('base64');
-      let payload = new Buffer(JSON.stringify(JWT.payload)).toString('base64');
+      let JWT = makeJWT(data, Date.now() / 1000 + 604800)
       
-      let firstPart = `${header}.${payload}`;
-      let signature = new Buffer(crypto.createHmac('sha256', process.env.SECRET)
-                        .update(firstPart)
-                        .digest('hex')).toString('base64');
-      let JWTtoken = `${firstPart}.${signature}`;
-      res.setHeader('access-token', `${JWTtoken}`);
+      res.setHeader('access-token', `${JWT}`);
       res.setHeader('client', 'bruh');
       res.setHeader('uid', '228');
       console.log(`\n[==DEBUG==] Signed in with email ${user.email}`);
@@ -55,8 +40,6 @@ router.post('/sign_in', async function(req, res) {
   }
   res.send(JSON.stringify(body));
 });
-
-
 
 router.post('/', async (req, res) => {
   res.setHeader('access-control-allow-origin', '*')
