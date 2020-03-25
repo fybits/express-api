@@ -7,8 +7,6 @@ const User = db.user;
 const { makeJWT, validateJWT } = require('../jwt');
 
 router.post('/sign_in', async function(req, res) {
-  res.setHeader('access-control-allow-origin', '*');
-  res.setHeader('access-control-expose-headers', 'access-token');
   const form = new Form();
   let formData = {};
   await form.parse(req, (err, fields, files) => {
@@ -19,7 +17,7 @@ router.post('/sign_in', async function(req, res) {
   
   const user = await User.findOne({ where: { email: formData.email } });
   res.status(401);
-  
+
   if (user) {
     const hash = crypto.createHmac('sha256', process.env.SECRET)
                   .update(formData.password.trim())
@@ -41,27 +39,26 @@ router.post('/sign_in', async function(req, res) {
 });
 
 router.post('/', async (req, res) => {
-  res.setHeader('access-control-allow-origin', '*')
   const form = new Form();
   let formData = {};
   await form.parse(req, (err, fields, files) => {
     console.log(fields);
     formData = fields;
   });
-  let body = { status: 'success', errors: { password: [], password_confirmation: [], email: [], name: []} };
-  if (formData.password !== formData.password_confirmation) {
-    body.errors.password_confirmation.push('password are not matching');
+  let body = { status: 'success', errors: { password: [], passwordConfirmation: [], email: [], name: []} };
+  if (formData.password !== formData.passwordConfirmation) {
+    body.errors.passwordConfirmation.push('password are not matching');
     body.status = 'error';
   }
   if (formData.password.trim().length < 6) {
     body.errors.password.push('password too short, at least 6 characters');
     body.status = 'error';
   }
-  if (!formData.first_name.trim()) {
+  if (!formData.firstName.trim()) {
     body.errors.name.push('name required');
     body.status = 'error';
   }
-  if (RegExp('\\S+@\\S+\\.\\S+', 'g').test(formData.email.trim())) {
+  if (/\S+@\S+\.\S+/g.test(formData.email.trim())) {
     console.log('email valid');
     const user = await User.findOne({ where: { email: formData.email } });
     if (user !== null) {
@@ -83,8 +80,8 @@ router.post('/', async (req, res) => {
                    .digest('hex');
     const user = await User.create({
       email: formData.email.trim(),
-      firstName: formData.first_name.trim(),
-      lastName: formData.last_name.trim(),
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
       password: hash
     });
     body.data = user.toJSON();
