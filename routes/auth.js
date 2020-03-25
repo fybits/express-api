@@ -7,15 +7,15 @@ const User = db.user;
 const { makeJWT, validateJWT } = require('../jwt');
 
 router.post('/sign_in', async function(req, res) {
-  res.setHeader('access-control-allow-origin', '*')
-  res.setHeader('access-control-expose-headers', 'access-token')
+  res.setHeader('access-control-allow-origin', '*');
+  res.setHeader('access-control-expose-headers', 'access-token');
   const form = new Form();
   let formData = {};
   await form.parse(req, (err, fields, files) => {
     console.log(fields);
     formData = fields;
   });
-  let body = { status: 'error', errors: 'wrong credentials' };
+  let body = { status: 'error', errors: ['wrong credentials'] };
   
   const user = await User.findOne({ where: { email: formData.email } });
   res.status(401);
@@ -31,14 +31,13 @@ router.post('/sign_in', async function(req, res) {
       body.data = data;
       let JWT = makeJWT(data, Date.now() / 1000 + 604800)
       
-      res.setHeader('access-token', `${JWT}`);
-      res.setHeader('client', 'bruh');
-      res.setHeader('uid', '228');
+      res.setHeader('access-token', JWT);
       console.log(`\n[==DEBUG==] Signed in with email ${user.email}`);
       res.status(200);
     }
   }
-  res.send(JSON.stringify(body));
+  console.log(body)
+  res.send(body);
 });
 
 router.post('/', async (req, res) => {

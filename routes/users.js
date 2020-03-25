@@ -5,6 +5,7 @@ const User = db.user;
 const { makeJWT, validateJWT } = require('../jwt');
 
 router.get('/:id', async function(req, res, next) {
+  res.setHeader('access-control-allow-origin', '*');
   if (!validateJWT(req.headers['access-token'])) {
     res.status(401);
     res.send('{ error: "Sign in to get access to this resource" }');

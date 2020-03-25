@@ -4,6 +4,14 @@ const db = require('../database/models');
 const Post = db.post;
 const { makeJWT, validateJWT } = require('../jwt');
 
+router.options('/', async function(req, res, next) {
+  res.setHeader('access-control-allow-origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'access-token');
+  res.setHeader('Allow', 'GET, PUT, DELETE, POST');
+  res.status(204);
+  res.send('');
+});
+
 router.get('/', async function(req, res, next) {
   if (!validateJWT(req.headers['access-token'])) {
     res.status(401);

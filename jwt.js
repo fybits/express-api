@@ -23,6 +23,7 @@ const makeJWT = (data, iat) => {
 };
 
 const validateJWT = (JWT) => {
+  if (!JWT) return false;
   let chunks = JWT.split('.');
   let firstPart = `${chunks[0]}.${chunks[1]}`;
   let signature = new Buffer(crypto.createHmac('sha256', process.env.SECRET)
