@@ -4,13 +4,12 @@ const Form = require('formidable').IncomingForm;
 const crypto = require('crypto');
 const db = require('../database/models');
 const User = db.user;
-const { makeJWT, validateJWT } = require('../jwt');
+const JWT = require('../jwt');
 
 router.post('/sign_in', async function(req, res) {
   const form = new Form();
   let formData = {};
   await form.parse(req, (err, fields, files) => {
-    console.log(fields);
     formData = fields;
   });
   let body = { status: 'error', errors: ['wrong credentials'] };
@@ -27,14 +26,12 @@ router.post('/sign_in', async function(req, res) {
       delete body.errors;
       const { password, ...data } = user.toJSON();
       body.data = data;
-      let JWT = makeJWT(data, Date.now() / 1000 + 604800)
+      let JWT = JWT.makeJWT(data, Date.now() / 1000 + 604800)
       
       res.setHeader('access-token', JWT);
-      console.log(`\n[==DEBUG==] Signed in with email ${user.email}`);
       res.status(200);
     }
   }
-  console.log(body)
   res.send(body);
 });
 
@@ -42,7 +39,6 @@ router.post('/', async (req, res) => {
   const form = new Form();
   let formData = {};
   await form.parse(req, (err, fields, files) => {
-    console.log(fields);
     formData = fields;
   });
   let body = { status: 'success', errors: { password: [], passwordConfirmation: [], email: [], name: []} };
@@ -59,7 +55,6 @@ router.post('/', async (req, res) => {
     body.status = 'error';
   }
   if (/\S+@\S+\.\S+/g.test(formData.email.trim())) {
-    console.log('email valid');
     const user = await User.findOne({ where: { email: formData.email } });
     if (user !== null) {
       body.errors.email.push('user with this email already registered');
@@ -87,10 +82,8 @@ router.post('/', async (req, res) => {
     body.data = user.toJSON();
     delete body.errors;
     res.status(200);
-    console.log(`\n[==DEBUG==] Registered with email ${user.email}`);
   } else {
     res.status(401);
-    console.log(body);
   }
   res.send(JSON.stringify(body));
 });
