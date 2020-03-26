@@ -26,9 +26,9 @@ router.post('/sign_in', async function(req, res) {
       delete body.errors;
       const { password, ...data } = user.toJSON();
       body.data = data;
-      let JWT = JWT.makeJWT(data, Date.now() / 1000 + 604800)
+      let jwt = JWT.makeJWT(data, Date.now() / 1000 + 604800)
       
-      res.setHeader('access-token', JWT);
+      res.setHeader('access-token', jwt);
       res.status(200);
     }
   }
