@@ -11,20 +11,20 @@ module.exports = {
       email: {
         type: Sequelize.STRING(64)
       },
-      firstName: {
+      first_name: {
         type: Sequelize.STRING(64)
       },
-      lastName: {
+      last_name: {
         type: Sequelize.STRING(64)
       },
       password: {
         type: Sequelize.STRING(65)
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }

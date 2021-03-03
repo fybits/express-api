@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Form = require('formidable').IncomingForm;
+const models = require('../database/models');
 const crypto = require('crypto');
-const db = require('../database/models');
-const User = db.user;
 const JWT = require('../jwt');
 
 router.post('/sign_in', async function(req, res) {
@@ -13,8 +12,8 @@ router.post('/sign_in', async function(req, res) {
     formData = fields;
   });
   let body = { status: 'error', errors: ['wrong credentials'] };
-  
-  const user = await User.findOne({ where: { email: formData.email } });
+
+  const user = await models.User.findOne({ where: { email: formData.email } });
   res.status(401);
 
   if (user) {
@@ -27,7 +26,7 @@ router.post('/sign_in', async function(req, res) {
       const { password, ...data } = user.toJSON();
       body.data = data;
       let jwt = JWT.makeJWT(data, Date.now() / 1000 + 604800)
-      
+
       res.setHeader('access-token', jwt);
       res.status(200);
     }
@@ -41,21 +40,21 @@ router.post('/', async (req, res) => {
   await form.parse(req, (err, fields, files) => {
     formData = fields;
   });
-  let body = { status: 'success', errors: { password: [], passwordConfirmation: [], email: [], name: []} };
-  if (formData.password !== formData.passwordConfirmation) {
-    body.errors.passwordConfirmation.push('password are not matching');
+  let body = { status: 'success', errors: { password: [], password_confirmation: [], email: [], name: []} };
+  if (formData.password !== formData.password_confirmation) {
+    body.errors.password_confirmation.push('password are not matching');
     body.status = 'error';
   }
   if (formData.password.trim().length < 6) {
     body.errors.password.push('password too short, at least 6 characters');
     body.status = 'error';
   }
-  if (!formData.firstName.trim()) {
+  if (!formData.first_name.trim()) {
     body.errors.name.push('name required');
     body.status = 'error';
   }
   if (/\S+@\S+\.\S+/g.test(formData.email.trim())) {
-    const user = await User.findOne({ where: { email: formData.email } });
+    const user = await models.User.findOne({ where: { email: formData.email } });
     if (user !== null) {
       body.errors.email.push('user with this email already registered');
       body.status = 'error';
@@ -73,10 +72,10 @@ router.post('/', async (req, res) => {
     const hash = crypto.createHmac('sha256', process.env.SECRET)
                    .update(formData.password.trim())
                    .digest('hex');
-    const user = await User.create({
+    const user = await models.User.create({
       email: formData.email.trim(),
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
+      first_name: formData.first_name.trim(),
+      last_name: formData.last_name.trim(),
       password: hash
     });
     body.data = user.toJSON();

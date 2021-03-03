@@ -2,28 +2,28 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.bulkInsert('comments', [
       {
-        userId: 1,
-        commentableId: 2,
-        commentableType: 'post',
+        user_id: 1,
+        commentable_id: 2,
+        commentable_type: 'post',
         message: 'The comment below a post',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
-        userId: 1,
-        commentableId: 2,
-        commentableType: 'post',
+        user_id: 1,
+        commentable_id: 2,
+        commentable_type: 'post',
         message: 'The comment below a post which is also commentable',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
-        userId: 1,
-        commentableId: 2,
-        commentableType: 'comment',
+        user_id: 1,
+        commentable_id: 2,
+        commentable_type: 'comment',
         message: 'The comment below another comment',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
     ]);
   },

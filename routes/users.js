@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/models');
-const User = db.user;
+const models = require('../database/models');
 const JWT = require('../jwt');
 
 router.get('/:id', async function(req, res, next) {
@@ -9,7 +8,7 @@ router.get('/:id', async function(req, res, next) {
     res.status(401);
     res.send({ error: 'Sign in to get access to this resource' });
   } else {
-    const user = await User.findOne({ where: { id: req.params.id }});
+    const user = await models.User.findOne({ where: { id: req.params.id }});
     if (user) {
       const { password, ...data } = user.toJSON();
       res.status(200);

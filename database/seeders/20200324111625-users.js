@@ -3,19 +3,19 @@ module.exports = {
     return queryInterface.bulkInsert('users', [
       {
         email: "bruh@bruh.com",
-        firstName: "bruh",
-        lastName: "bruh",
+        first_name: "bruh",
+        last_name: "bruh",
         password: "wocncsuxuydgauysgcuzxgcsamlzckmoon",
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         email: "email@mail.com",
-        firstName: "name",
-        lastName: "lastname",
+        first_name: "name",
+        last_name: "last_name",
         password: "213123123uydgauysgcuzxgcsamlzckmoon",
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
     ]);
   },
