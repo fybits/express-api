@@ -5,13 +5,13 @@ const models = require('../database/models');
 const crypto = require('crypto');
 const JWT = require('../jwt');
 
-router.post('/sign_in', async function(req, res) {
+router.post('/signin', async (req, res) => {
   const form = new Form();
   let formData = {};
   await form.parse(req, (err, fields, files) => {
     formData = fields;
   });
-  let body = { status: 'error', errors: ['wrong credentials'] };
+  const body = { errors: ['wrong credentials'] };
 
   const user = await models.User.findOne({ where: { email: formData.email } });
   res.status(401);
@@ -21,11 +21,10 @@ router.post('/sign_in', async function(req, res) {
                   .update(formData.password.trim())
                   .digest('hex');
     if (user.password === hash) {
-      body.status = 'success';
       delete body.errors;
       const { password, ...data } = user.toJSON();
       body.data = data;
-      let jwt = JWT.makeJWT(data, Date.now() / 1000 + 604800)
+      const jwt = JWT.makeJWT(data, Date.now() / 1000 + 604800)
 
       res.setHeader('access-token', jwt);
       res.status(200);
@@ -34,13 +33,13 @@ router.post('/sign_in', async function(req, res) {
   res.send(body);
 });
 
-router.post('/', async (req, res) => {
+router.post('/signup', async (req, res) => {
   const form = new Form();
   let formData = {};
   await form.parse(req, (err, fields, files) => {
     formData = fields;
   });
-  let body = { status: 'success', errors: { password: [], password_confirmation: [], email: [], name: []} };
+  const body = { status: 'success', errors: { password: [], password_confirmation: [], email: [], name: []} };
   if (formData.password !== formData.password_confirmation) {
     body.errors.password_confirmation.push('password are not matching');
     body.status = 'error';

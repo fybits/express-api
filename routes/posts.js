@@ -1,32 +1,41 @@
 const express = require('express');
 const router = express.Router();
 const models = require('../database/models');
-const JWT = require('../jwt');
+const { authenticate } = require('../utils/authenticate');
 
 
-router.get('/', async function(req, res, next) {
-  if (!JWT.validateJWT(req.headers['access-token'])) {
-    res.status(401);
-    res.send({ error: 'Sign in to get access to this resource' });
-  } else {
+router.get('/',
+  authenticate(),
+  async (req, res) => {
+    const user_id = res.locals.user.id;
+    const user = await models.User.findByPk(user_id, {
+      include: {
+        model: models.User,
+        as: 'following',
+      },
+    });
+    console.log(user.following);
+    const subscriptions = user.following.map((follow) => follow.id);
     const posts = await models.Post.findAll({
       include: {
         model: models.User,
         as: 'user',
+        where: {
+          id: [user_id, ...subscriptions],
+        }
       },
+      order: [['created_at', 'DESC']],
     });
     res.status(200);
 
     const strippedPosts = posts.map((p) => p.toJSON());
     res.send(JSON.stringify(strippedPosts));
   }
-});
+);
 
-router.get('/:id', async function(req, res, next) {
-  if (!JWT.validateJWT(req.headers['access-token'])) {
-    res.status(401);
-    res.send({ error: 'Sign in to get access to this resource' });
-  } else {
+router.get('/:id',
+  authenticate(),
+  async (req, res) => {
     const post = await models.Post.findOne({
       where: { id: req.params.id },
       include: {
@@ -42,26 +51,22 @@ router.get('/:id', async function(req, res, next) {
       res.send({ error: 'Not found' });
     }
   }
-});
+);
 
-router.post('/', async function(req, res, next) {
-  if (!JWT.validateJWT(req.headers['access-token'])) {
-    res.status(401);
-    res.send({ error: 'Sign in to get access to this resource' });
-  } else {
-    let user_id = JWT.getPayload(req.headers['access-token']).id;
-    const post = await models.Post.create({ user_id, ...req.body.post });
+router.post('/',
+  authenticate(),
+  async (req, res) => {
+    const user_id = res.locals.user.id;
+    const post = await models.Post.create({ user_id, ...req.body });
     res.status(200);
     res.send(post.toJSON());
   }
-});
+);
 
-router.put('/:id', async function(req, res, next) {
-  if (!JWT.validateJWT(req.headers['access-token'])) {
-    res.status(401);
-    res.send({ error: 'Sign in to get access to this resource' });
-  } else {
-    let user_id = JWT.getPayload(req.headers['access-token']).id;
+router.put('/:id',
+  authenticate(),
+  async (req, res) => {
+    const user_id = res.locals.user.id;
     const post = await models.Post.findOne({ where: { user_id, id: req.params.id } });
     if (post) {
       post.title = req.body.post.title;
@@ -74,14 +79,12 @@ router.put('/:id', async function(req, res, next) {
       res.send({ error: "Either post doesn't exist or you don't have permissions to edit it" });
     }
   }
-});
+);
 
-router.delete('/:id', async function(req, res, next) {
-  if (!JWT.validateJWT(req.headers['access-token'])) {
-    res.status(401);
-    res.send({ error: 'Sign in to get access to this resource' });
-  } else {
-    let user_id = JWT.getPayload(req.headers['access-token']).id;
+router.delete('/:id',
+  authenticate(),
+  async (req, res) => {
+    const user_id = res.locals.user.id;
     const post = await models.Post.findOne({ where: { user_id, id: req.params.id } });
     if (post) {
       post.destroy();
@@ -91,6 +94,6 @@ router.delete('/:id', async function(req, res, next) {
       res.send({ error: "Either post doesn't exist or you don't have permissions to delete it" });
     }
   }
-});
+);
 
 module.exports = router;
