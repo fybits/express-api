@@ -3,6 +3,26 @@ const router = express.Router();
 const models = require('../database/models');
 const { authenticate } = require('../utils/authenticate');
 
+router.get('/commentable/:type/:id',
+  authenticate(),
+  async (req, res) => {
+    const { id, type } = req.params;
+
+    const comments = await models.Comment.findAll({
+      where: {
+        commentable_type: type,
+        commentable_id: id,
+      },
+      include: {
+        model: models.User,
+        as: 'user',
+      },
+    });
+    res.status(200);
+    res.send(JSON.stringify(comments));
+  }
+);
+
 router.get('/',
   authenticate(),
   async (req, res) => {
@@ -38,6 +58,7 @@ router.post('/',
   async (req, res) => {
     const user_id = res.locals.user.id;
     const comment = await models.Comment.create({ user_id, ...req.body });
+    console.log(comment)
     res.status(200);
     res.send(comment.toJSON());
   }

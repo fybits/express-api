@@ -14,7 +14,6 @@ router.get('/',
         as: 'following',
       },
     });
-    console.log(user.following);
     const subscriptions = user.following.map((follow) => follow.id);
     const posts = await models.Post.findAll({
       include: {
@@ -69,8 +68,8 @@ router.put('/:id',
     const user_id = res.locals.user.id;
     const post = await models.Post.findOne({ where: { user_id, id: req.params.id } });
     if (post) {
-      post.title = req.body.post.title;
-      post.description = req.body.post.description;
+      post.title = req.body.title;
+      post.description = req.body.description;
       post.save();
       res.status(200);
       res.send(post.toJSON());
